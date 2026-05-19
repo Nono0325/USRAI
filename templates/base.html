@@ -653,6 +653,79 @@
                 box-shadow: 0 0 0 16px rgba(46, 125, 50, 0);
             }
         }
+        .mine-modal .modal-content {
+            border: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        .mine-toolbar {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 14px;
+            background: #0f766e;
+            color: #fff;
+        }
+        .mine-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 34px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .mine-board {
+            display: grid;
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+            gap: 4px;
+            width: min(82vw, 360px);
+            aspect-ratio: 1;
+            margin: 18px auto;
+            padding: 8px;
+            border-radius: 8px;
+            background: #dbeafe;
+            box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.16);
+        }
+        .mine-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 0;
+            border-radius: 6px;
+            background: linear-gradient(180deg, #ffffff, #d1fae5);
+            color: #0f172a;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: 0 2px 0 rgba(15, 118, 110, 0.28);
+            touch-action: manipulation;
+        }
+        .mine-cell:hover {
+            transform: translateY(-1px);
+        }
+        .mine-cell.is-open {
+            background: #eef2ff;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+            transform: none;
+        }
+        .mine-cell.is-flagged {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .mine-cell.is-mine {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .mine-status {
+            min-height: 24px;
+            margin: 0 18px 18px;
+            color: #334155;
+            font-weight: 700;
+            text-align: center;
+        }
+        .footer-signature {
+            cursor: pointer;
+        }
         @media (prefers-reduced-motion: reduce) {
             .site-loader::before,
             .site-loader::after,
@@ -764,10 +837,37 @@
             <h5 class="fw-bold">水井村風雲客棧</h5>
             <p>傳承在地三生共好，體驗真實的生態與生產之美</p>
             <hr class="w-25 mx-auto">
-            <small>&copy; 2026 水井村風雲客棧. All Rights Reserved. <span style="opacity: 0.15; font-size: 0.65rem; margin-left: 10px; vertical-align: middle; user-select: none; pointer-events: none;" title="Developer Signature">NonoWuW</span></small>
+            <small>&copy; 2026 水井村風雲客棧. All Rights Reserved. <span id="mineEasterTrigger" class="footer-signature" style="opacity: 0.15; font-size: 0.65rem; margin-left: 10px; vertical-align: middle; user-select: none;" title="Developer Signature">NonoWuW</span></small>
         </div>
     </footer>
     <!-- Crafted with ❤️ by NonoWuW -->
+
+    <div class="modal fade mine-modal" id="mineEasterModal" tabindex="-1" aria-labelledby="mineEasterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="mine-toolbar">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="mineEasterTitle">
+                            <i class="fa-solid fa-bomb me-2"></i>水井踩地雷
+                        </h5>
+                        <div class="small opacity-75">9 x 9 / 10 顆地雷</div>
+                    </div>
+                    <button class="btn btn-light btn-sm rounded-pill px-3" type="button" id="mineFlagMode" aria-pressed="false">
+                        <i class="fa-solid fa-flag me-1"></i>旗標
+                    </button>
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3" type="button" id="mineRestart">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-center gap-4 pt-3">
+                    <span class="mine-stat"><i class="fa-solid fa-bomb text-danger"></i><span id="mineLeft">10</span></span>
+                    <span class="mine-stat"><i class="fa-regular fa-clock text-primary"></i><span id="mineTimer">0</span>s</span>
+                </div>
+                <div class="mine-board" id="mineBoard" role="grid" aria-label="踩地雷棋盤"></div>
+                <p class="mine-status" id="mineStatus">點開格子，避開所有地雷。</p>
+            </div>
+        </div>
+    </div>
 
     <section class="aqua-chat-panel" id="aquaChatPanel" aria-live="polite">
         <div class="aqua-chat-header">
@@ -1013,6 +1113,214 @@
                 } finally {
                     sendBtn.disabled = false;
                     input.focus();
+                }
+            });
+
+            const mineTrigger = document.getElementById('mineEasterTrigger');
+            const mineModalElement = document.getElementById('mineEasterModal');
+            const mineBoard = document.getElementById('mineBoard');
+            const mineLeft = document.getElementById('mineLeft');
+            const mineTimer = document.getElementById('mineTimer');
+            const mineStatus = document.getElementById('mineStatus');
+            const mineRestart = document.getElementById('mineRestart');
+            const mineFlagMode = document.getElementById('mineFlagMode');
+            const mineModal = mineModalElement ? new bootstrap.Modal(mineModalElement) : null;
+            const mineSize = 9;
+            const mineCount = 10;
+            let mineCells = [];
+            let mineStarted = false;
+            let mineGameOver = false;
+            let mineFlagging = false;
+            let mineOpened = 0;
+            let mineSeconds = 0;
+            let mineInterval = null;
+            let mineClicks = 0;
+            let mineClickTimer = null;
+
+            const mineNeighbors = (index) => {
+                const row = Math.floor(index / mineSize);
+                const col = index % mineSize;
+                const result = [];
+                for (let dr = -1; dr <= 1; dr += 1) {
+                    for (let dc = -1; dc <= 1; dc += 1) {
+                        if (dr === 0 && dc === 0) continue;
+                        const nr = row + dr;
+                        const nc = col + dc;
+                        if (nr >= 0 && nr < mineSize && nc >= 0 && nc < mineSize) {
+                            result.push(nr * mineSize + nc);
+                        }
+                    }
+                }
+                return result;
+            };
+
+            const mineUpdateStats = () => {
+                const flags = mineCells.filter((cell) => cell.flagged).length;
+                mineLeft.textContent = Math.max(mineCount - flags, 0);
+            };
+
+            const mineSetTimer = (running) => {
+                window.clearInterval(mineInterval);
+                mineInterval = null;
+                if (running) {
+                    mineInterval = window.setInterval(() => {
+                        mineSeconds += 1;
+                        mineTimer.textContent = mineSeconds;
+                    }, 1000);
+                }
+            };
+
+            const mineRender = () => {
+                mineBoard.textContent = '';
+                mineCells.forEach((cell, index) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'mine-cell';
+                    button.setAttribute('role', 'gridcell');
+                    button.setAttribute('aria-label', `第 ${index + 1} 格`);
+                    if (cell.open) {
+                        button.classList.add('is-open');
+                        button.disabled = true;
+                        if (cell.mine) {
+                            button.classList.add('is-mine');
+                            button.innerHTML = '<i class="fa-solid fa-bomb"></i>';
+                        } else if (cell.count > 0) {
+                            button.textContent = cell.count;
+                            button.style.color = ['#2563eb', '#16a34a', '#dc2626', '#7c3aed', '#b45309', '#0891b2', '#0f172a', '#475569'][cell.count - 1] || '#0f172a';
+                        }
+                    } else if (cell.flagged) {
+                        button.classList.add('is-flagged');
+                        button.innerHTML = '<i class="fa-solid fa-flag"></i>';
+                    }
+                    button.addEventListener('click', () => {
+                        if (mineFlagging) {
+                            mineToggleFlag(index);
+                        } else {
+                            mineOpen(index);
+                        }
+                    });
+                    button.addEventListener('contextmenu', (event) => {
+                        event.preventDefault();
+                        mineToggleFlag(index);
+                    });
+                    mineBoard.appendChild(button);
+                });
+                mineUpdateStats();
+            };
+
+            const minePlant = (safeIndex) => {
+                const blocked = new Set([safeIndex, ...mineNeighbors(safeIndex)]);
+                const choices = Array.from({ length: mineSize * mineSize }, (_, index) => index)
+                    .filter((index) => !blocked.has(index));
+                for (let i = choices.length - 1; i > 0; i -= 1) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [choices[i], choices[j]] = [choices[j], choices[i]];
+                }
+                choices.slice(0, mineCount).forEach((index) => {
+                    mineCells[index].mine = true;
+                });
+                mineCells.forEach((cell, index) => {
+                    cell.count = mineNeighbors(index).filter((neighbor) => mineCells[neighbor].mine).length;
+                });
+            };
+
+            const mineReset = () => {
+                mineCells = Array.from({ length: mineSize * mineSize }, () => ({
+                    mine: false,
+                    open: false,
+                    flagged: false,
+                    count: 0,
+                }));
+                mineStarted = false;
+                mineGameOver = false;
+                mineFlagging = false;
+                mineOpened = 0;
+                mineSeconds = 0;
+                mineTimer.textContent = '0';
+                mineStatus.textContent = '點開格子，避開所有地雷。';
+                mineFlagMode.classList.remove('btn-warning');
+                mineFlagMode.classList.add('btn-light');
+                mineFlagMode.setAttribute('aria-pressed', 'false');
+                mineSetTimer(false);
+                mineRender();
+            };
+
+            const mineRevealAll = () => {
+                mineCells.forEach((cell) => {
+                    if (cell.mine) cell.open = true;
+                });
+            };
+
+            const mineWinCheck = () => {
+                if (mineOpened === mineSize * mineSize - mineCount) {
+                    mineGameOver = true;
+                    mineSetTimer(false);
+                    mineStatus.textContent = `成功排雷，用時 ${mineSeconds} 秒。`;
+                    mineCells.forEach((cell) => {
+                        if (cell.mine) cell.flagged = true;
+                    });
+                    mineRender();
+                }
+            };
+
+            const mineOpen = (index) => {
+                if (mineGameOver || mineCells[index].flagged || mineCells[index].open) return;
+                if (!mineStarted) {
+                    mineStarted = true;
+                    minePlant(index);
+                    mineSetTimer(true);
+                }
+                const queue = [index];
+                while (queue.length) {
+                    const current = queue.shift();
+                    const cell = mineCells[current];
+                    if (cell.open || cell.flagged) continue;
+                    cell.open = true;
+                    mineOpened += 1;
+                    if (cell.mine) {
+                        mineGameOver = true;
+                        mineSetTimer(false);
+                        mineRevealAll();
+                        mineStatus.textContent = '踩到地雷，重新挑戰一次。';
+                        mineRender();
+                        return;
+                    }
+                    if (cell.count === 0) {
+                        mineNeighbors(current).forEach((neighbor) => {
+                            if (!mineCells[neighbor].open && !mineCells[neighbor].flagged) {
+                                queue.push(neighbor);
+                            }
+                        });
+                    }
+                }
+                mineRender();
+                mineWinCheck();
+            };
+
+            const mineToggleFlag = (index) => {
+                if (mineGameOver || mineCells[index].open) return;
+                mineCells[index].flagged = !mineCells[index].flagged;
+                mineRender();
+            };
+
+            mineFlagMode?.addEventListener('click', () => {
+                mineFlagging = !mineFlagging;
+                mineFlagMode.classList.toggle('btn-warning', mineFlagging);
+                mineFlagMode.classList.toggle('btn-light', !mineFlagging);
+                mineFlagMode.setAttribute('aria-pressed', mineFlagging ? 'true' : 'false');
+            });
+            mineRestart?.addEventListener('click', mineReset);
+            mineModalElement?.addEventListener('shown.bs.modal', mineReset);
+            mineModalElement?.addEventListener('hidden.bs.modal', () => mineSetTimer(false));
+            mineTrigger?.addEventListener('click', () => {
+                mineClicks += 1;
+                window.clearTimeout(mineClickTimer);
+                mineClickTimer = window.setTimeout(() => {
+                    mineClicks = 0;
+                }, 1200);
+                if (mineClicks >= 5) {
+                    mineClicks = 0;
+                    mineModal?.show();
                 }
             });
         })();

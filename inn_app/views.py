@@ -420,7 +420,7 @@ def manifest(request):
 
 def service_worker(request):
     content = """
-const CACHE_NAME = 'fengyun-inn-v1';
+const CACHE_NAME = 'fengyun-inn-v2';
 const CORE_URLS = ['/', '/courses/', '/aiot-guide/', '/water-dashboard/', '/my-bookings/'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_URLS)));
