@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}營運儀表板 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="display-5 fw-bold mb-2">營運儀表板</h1>
+            <p class="text-muted mb-0">整合課程報名、現場報到、候補名單、聯絡訊息與魚塭水質警示。</p>
+        </div>
+        <a class="btn btn-outline-primary rounded-pill px-4" href="/admin/Nono/">
+            <i class="fa-solid fa-screwdriver-wrench me-2"></i>進入後台
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">啟用課程</span>
+                <strong class="fs-3">{{ stats.courses }}</strong>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">報名筆數</span>
+                <strong class="fs-3">{{ stats.registrations }}</strong>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">正取人次</span>
+                <strong class="fs-3">{{ stats.confirmed_headcount }}</strong>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">已報到人次</span>
+                <strong class="fs-3">{{ stats.attended_headcount }}</strong>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">候補筆數</span>
+                <strong class="fs-3">{{ stats.waitlist }}</strong>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card h-100 p-3 border-0">
+                <span class="text-muted small">聯絡訊息</span>
+                <strong class="fs-3">{{ stats.messages }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 h-100">
+                <div class="card-header bg-white border-0 p-4">
+                    <h2 class="h5 fw-bold mb-0"><i class="fa-solid fa-calendar-days text-primary me-2"></i>近期課程</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>課程</th>
+                                <th>時間</th>
+                                <th>名額</th>
+                                <th class="text-end">名單</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in upcoming_courses %}
+                            <tr>
+                                <td class="fw-bold">{{ course.title }}</td>
+                                <td>{{ course.start_time|date:"m/d H:i" }}</td>
+                                <td>{{ course.capacity }}</td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary rounded-pill" href="{% url 'inn_app:course_registrations_csv' course.id %}">
+                                        <i class="fa-solid fa-file-csv me-1"></i>CSV
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">目前沒有即將開始的課程。</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 h-100">
+                <div class="card-header bg-white border-0 p-4">
+                    <h2 class="h5 fw-bold mb-0"><i class="fa-solid fa-water text-primary me-2"></i>水質警示</h2>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for item in latest_readings %}
+                    <div class="list-group-item px-4 py-3">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <strong>{{ item.pond.name }}</strong>
+                                <div class="small text-muted">{{ item.pond.species }}</div>
+                            </div>
+                            {% if item.alerts %}
+                            <span class="badge bg-warning text-dark align-self-start">{{ item.alerts|join:"、" }}</span>
+                            {% else %}
+                            <span class="badge bg-success align-self-start">正常</span>
+                            {% endif %}
+                        </div>
+                        {% if item.latest %}
+                        <div class="small text-muted mt-2">
+                            溶氧 {{ item.latest.dissolved_oxygen }} mg/L、pH {{ item.latest.ph }}、水溫 {{ item.latest.temperature }} C
+                        </div>
+                        {% else %}
+                        <div class="small text-muted mt-2">尚無讀值</div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-muted px-4 py-4">尚未建立魚塭資料。</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 mt-4">
+        <div class="card-header bg-white border-0 p-4">
+            <h2 class="h5 fw-bold mb-0"><i class="fa-solid fa-user-check text-primary me-2"></i>最新報名與報到</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>姓名</th>
+                        <th>課程</th>
+                        <th>人數</th>
+                        <th>狀態</th>
+                        <th>報到</th>
+                        <th>建立時間</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in recent_registrations %}
+                    <tr>
+                        <td class="fw-bold">{{ reg.name }}</td>
+                        <td>{{ reg.course.title }}</td>
+                        <td>{{ reg.headcount }}</td>
+                        <td>{% if reg.is_waitlisted %}<span class="badge bg-warning text-dark">候補 {{ reg.waitlist_number }}</span>{% else %}<span class="badge bg-success">正取</span>{% endif %}</td>
+                        <td>{% if reg.is_attended %}<span class="text-success">已報到</span>{% else %}<span class="text-muted">未報到</span>{% endif %}</td>
+                        <td>{{ reg.created_at|date:"m/d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">目前沒有報名紀錄。</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

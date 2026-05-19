@@ -1,13 +1,17 @@
-from django.shortcuts import render, get_object_or_404, redirect
+import csv
+from datetime import timedelta
+
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from datetime import timedelta
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.dateformat import format
 from .models import CarouselItem, Service, DutyStaff, Course, Registration, Event, Story, USRAchievement, TechProject, ExperienceCourse, TechSection, ContactInfo, ContactMessage
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from .forms import RegistrationForm
+from water.models import Pond
 
 def home(request):
     carousels = CarouselItem.objects.filter(is_active=True).order_by('order')
@@ -264,7 +268,7 @@ def check_in_scan(request, token):
     if not request.user.is_staff:
         from django.contrib.auth.views import redirect_to_login
         # 沒有權限的手機一掃描，直接被踢去登入畫面
-        return redirect_to_login(request.get_full_path())
+        return redirect_to_login(request.get_full_path(), login_url='/admin/Nono/login/')
         
     registration = get_object_or_404(Registration, checkin_token=token)
     
@@ -278,6 +282,164 @@ def check_in_scan(request, token):
         messages.success(request, f"🎉 掃碼核銷成功！【{registration.name}】（共 {registration.headcount} 人）已成功登記入場。")
         
     return redirect('inn_app:home')
+
+@staff_member_required(login_url='/admin/Nono/login/')
+def operations_dashboard(request):
+    from django.utils import timezone
+
+    now = timezone.now()
+    upcoming_courses = Course.objects.filter(
+        is_active=True,
+        start_time__gte=now,
+    ).order_by('start_time')[:6]
+    recent_registrations = Registration.objects.select_related('course').order_by('-created_at')[:8]
+    latest_readings = []
+
+    for pond in Pond.objects.prefetch_related('readings').all():
+        latest = pond.readings.first()
+        alerts = []
+        if latest:
+            if latest.dissolved_oxygen < 4:
+                alerts.append('溶氧偏低')
+            if latest.ph < 6.5 or latest.ph > 9:
+                alerts.append('pH 異常')
+            if latest.temperature > 32:
+                alerts.append('水溫偏高')
+        latest_readings.append({
+            'pond': pond,
+            'latest': latest,
+            'alerts': alerts,
+        })
+
+    registration_count = Registration.objects.count()
+    confirmed_headcount = Registration.objects.filter(is_waitlisted=False).aggregate(
+        total=Sum('headcount')
+    )['total'] or 0
+    attended_headcount = Registration.objects.filter(is_attended=True).aggregate(
+        total=Sum('headcount')
+    )['total'] or 0
+
+    return render(request, 'inn_app/operations_dashboard.html', {
+        'upcoming_courses': upcoming_courses,
+        'recent_registrations': recent_registrations,
+        'latest_readings': latest_readings,
+        'stats': {
+            'courses': Course.objects.filter(is_active=True).count(),
+            'registrations': registration_count,
+            'confirmed_headcount': confirmed_headcount,
+            'attended_headcount': attended_headcount,
+            'waitlist': Registration.objects.filter(is_waitlisted=True).count(),
+            'messages': ContactMessage.objects.count(),
+        },
+    })
+
+
+@staff_member_required(login_url='/admin/Nono/login/')
+def course_registrations_csv(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = f'attachment; filename="course_{course.id}_registrations.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['課程', '姓名', '電話', 'Email', '性別', '人數', '狀態', '是否報到', '報到時間', '建立時間'])
+
+    for reg in Registration.objects.filter(course=course).order_by('created_at'):
+        writer.writerow([
+            course.title,
+            reg.name,
+            reg.phone,
+            reg.email,
+            reg.get_gender_display(),
+            reg.headcount,
+            f'候補 {reg.waitlist_number}' if reg.is_waitlisted else '正取',
+            '已報到' if reg.is_attended else '未報到',
+            reg.attended_at.strftime('%Y-%m-%d %H:%M') if reg.attended_at else '',
+            reg.created_at.strftime('%Y-%m-%d %H:%M'),
+        ])
+    return response
+
+
+def water_dashboard(request):
+    ponds = Pond.objects.all().order_by('name')
+    return render(request, 'inn_app/water_dashboard.html', {'ponds': ponds})
+
+
+def water_history_api(request):
+    from django.utils import timezone
+
+    pond_id = request.GET.get('pond')
+    try:
+        days = min(max(int(request.GET.get('days', 7)), 1), 30)
+    except ValueError:
+        days = 7
+    qs = Pond.objects.all()
+    pond = get_object_or_404(qs, id=pond_id) if pond_id else qs.order_by('name').first()
+    if not pond:
+        return JsonResponse({'ponds': [], 'readings': []})
+
+    since = timezone.now() - timedelta(days=days)
+    readings = pond.readings.filter(measured_at__gte=since).order_by('measured_at')
+    return JsonResponse({
+        'pond': {'id': pond.id, 'name': pond.name, 'species': pond.species},
+        'ponds': list(qs.order_by('name').values('id', 'name', 'species')),
+        'readings': [
+            {
+                'measured_at': item.measured_at.strftime('%m/%d %H:%M'),
+                'temperature': item.temperature,
+                'ph': item.ph,
+                'dissolved_oxygen': item.dissolved_oxygen,
+                'salinity': item.salinity,
+            }
+            for item in readings
+        ],
+    })
+
+
+def manifest(request):
+    return JsonResponse({
+        'name': '水井村風雲客棧',
+        'short_name': '風雲客棧',
+        'start_url': '/',
+        'display': 'standalone',
+        'background_color': '#f7faf4',
+        'theme_color': '#1f7a4d',
+        'description': '水井村風雲客棧活動、USR 成果與智慧養殖平台',
+        'icons': [
+            {
+                'src': 'https://images.unsplash.com/photo-1542314831-c6a4d14effb0?q=80&w=192&auto=format&fit=crop',
+                'sizes': '192x192',
+                'type': 'image/jpeg',
+            },
+            {
+                'src': 'https://images.unsplash.com/photo-1542314831-c6a4d14effb0?q=80&w=512&auto=format&fit=crop',
+                'sizes': '512x512',
+                'type': 'image/jpeg',
+            },
+        ],
+    })
+
+
+def service_worker(request):
+    content = """
+const CACHE_NAME = 'fengyun-inn-v1';
+const CORE_URLS = ['/', '/courses/', '/aiot-guide/', '/water-dashboard/', '/my-bookings/'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_URLS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null))));
+  self.clients.claim();
+});
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(fetch(event.request).then(response => {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+    return response;
+  }).catch(() => caches.match(event.request).then(cached => cached || caches.match('/'))));
+});
+"""
+    return HttpResponse(content, content_type='application/javascript')
 
 def about(request):
     return render(request, 'inn_app/about.html')

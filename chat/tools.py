@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.db.models import Avg
 from django.utils import timezone
 
+from inn_app.models import ContactInfo, Course, Event, Story, TechProject, USRAchievement
 from water.models import Pond
 
 
@@ -97,6 +98,66 @@ def check_thresholds(pond_name: str) -> dict:
     }
 
 
+def search_site(query: str) -> dict:
+    query = (query or "").strip()
+    if not query:
+        return {"error": "請提供搜尋關鍵字。"}
+
+    return {
+        "courses": [
+            {"title": item.title, "instructor": item.instructor, "start_time": item.start_time.isoformat()}
+            for item in Course.objects.filter(title__icontains=query, is_active=True).order_by("-start_time")[:5]
+        ],
+        "events": [
+            {"title": item.title, "date": item.date.isoformat(), "description": item.description[:120]}
+            for item in Event.objects.filter(title__icontains=query).order_by("-date")[:5]
+        ],
+        "stories": [
+            {"title": item.title, "category": item.category}
+            for item in Story.objects.filter(title__icontains=query).order_by("-created_at")[:5]
+        ],
+        "achievements": [
+            {"title": item.title, "date": item.date.isoformat(), "summary": item.summary[:120]}
+            for item in USRAchievement.objects.filter(title__icontains=query).order_by("-date")[:5]
+        ],
+        "tech_projects": [
+            {"name": item.name}
+            for item in TechProject.objects.filter(name__icontains=query, is_active=True).order_by("order")[:5]
+        ],
+    }
+
+
+def get_upcoming_courses(limit: int = 5) -> dict:
+    limit = min(max(int(limit or 5), 1), 10)
+    courses = Course.objects.filter(
+        is_active=True,
+        start_time__gte=timezone.now(),
+    ).order_by("start_time")[:limit]
+    return {
+        "courses": [
+            {
+                "title": item.title,
+                "instructor": item.instructor,
+                "start_time": item.start_time.isoformat(),
+                "capacity": item.capacity,
+            }
+            for item in courses
+        ]
+    }
+
+
+def get_contact_info() -> dict:
+    info = ContactInfo.objects.filter(is_active=True).first()
+    if not info:
+        return {"error": "目前尚未設定聯絡資訊。"}
+    return {
+        "title": info.title,
+        "address": info.address,
+        "phone": info.phone,
+        "email": info.email,
+    }
+
+
 TOOL_SCHEMAS = [
     {
         "type": "function",
@@ -164,6 +225,41 @@ TOOL_SCHEMAS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_site",
+            "description": "搜尋網站內容，包含課程、活動、故事、USR 成果與科技專案。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "搜尋關鍵字"}
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_upcoming_courses",
+            "description": "查詢近期可參加的課程與活動報名資訊。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {"type": "integer", "description": "回傳筆數，預設 5"}
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_contact_info",
+            "description": "查詢水井村風雲客棧的地址、電話與 Email。",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
 
 _TOOL_REGISTRY = {
@@ -172,6 +268,9 @@ _TOOL_REGISTRY = {
     "get_average_do": get_average_do,
     "get_water_quality_history": get_water_quality_history,
     "check_thresholds": check_thresholds,
+    "search_site": search_site,
+    "get_upcoming_courses": get_upcoming_courses,
+    "get_contact_info": get_contact_info,
 }
 
 

@@ -15,6 +15,8 @@
     {% endblock %}
     
     <title>{% block title %}水井村風雲客棧{% endblock %}</title>
+    <link rel="manifest" href="{% url 'inn_app:manifest' %}">
+    <meta name="theme-color" content="#1f7a4d">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -443,7 +445,7 @@
         .aqua-chat-modes {
             position: relative;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 0;
             padding: 4px;
             border: 1px solid rgba(15, 118, 110, 0.18);
@@ -455,7 +457,7 @@
             position: absolute;
             top: 4px;
             left: 4px;
-            width: calc((100% - 8px) / 4);
+            width: calc((100% - 8px) / 5);
             height: calc(100% - 8px);
             border-radius: 999px;
             background: linear-gradient(135deg, #0f766e, #2563eb);
@@ -474,6 +476,9 @@
         }
         .aqua-chat-modes[data-active="ponds"] .aqua-chat-mode-indicator {
             transform: translateX(300%);
+        }
+        .aqua-chat-modes[data-active="site"] .aqua-chat-mode-indicator {
+            transform: translateX(400%);
         }
         .aqua-chat-mode {
             position: relative;
@@ -661,6 +666,7 @@
     </style>
 </head>
 <body>
+    <div id="google_translate_element" style="position:absolute; left:-9999px; top:auto;"></div>
     <div class="site-loader-overlay is-visible" id="siteLoaderOverlay" role="status" aria-live="polite" aria-label="頁面載入中">
         <div class="site-loader-card">
             <div class="site-loader" aria-hidden="true">
@@ -702,7 +708,23 @@
                         <a class="nav-link" href="{% url 'inn_app:aiot_guide' %}">AIoT科技</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inn_app:water_dashboard' %}">水質圖表</a>
+                    </li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inn_app:operations_dashboard' %}">營運儀表板</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'inn_app:contact' %}">聯絡我們</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">語言</a>
+                        <ul class="dropdown-menu">
+                            <li><button class="dropdown-item" type="button" data-lang="zh-Hant">繁中</button></li>
+                            <li><button class="dropdown-item" type="button" data-lang="en">English</button></li>
+                            <li><button class="dropdown-item" type="button" data-lang="ja">日本語</button></li>
+                        </ul>
                     </li>
                     <li class="nav-item ms-lg-3">
                         <form action="{% url 'inn_app:search' %}" method="get" class="d-flex align-items-center bg-white bg-opacity-10 rounded-pill px-2 py-1 shadow-sm border border-secondary">
@@ -782,6 +804,10 @@
                     <input type="radio" name="aqua-chat-mode" value="ponds">
                     <span><i class="fa-solid fa-list"></i>魚塭</span>
                 </label>
+                <label class="aqua-chat-mode">
+                    <input type="radio" name="aqua-chat-mode" value="site">
+                    <span><i class="fa-solid fa-circle-info"></i>網站</span>
+                </label>
             </div>
         </div>
         <form class="aqua-chat-form" id="aquaChatForm">
@@ -799,6 +825,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (() => {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register("{% url 'inn_app:service_worker' %}").catch(() => {});
+                });
+            }
+
+            function setGoogleTranslateLang(lang) {
+                const select = document.querySelector('.goog-te-combo');
+                if (!select) return false;
+                select.value = lang === 'zh-Hant' ? 'zh-TW' : lang;
+                select.dispatchEvent(new Event('change'));
+                return true;
+            }
+
+            document.querySelectorAll('[data-lang]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const lang = button.dataset.lang;
+                    document.documentElement.lang = lang;
+                    window.localStorage.setItem('fengyun-lang', lang);
+                    if (!setGoogleTranslateLang(lang)) {
+                        window.setTimeout(() => setGoogleTranslateLang(lang), 800);
+                    }
+                });
+            });
+            const savedLang = window.localStorage.getItem('fengyun-lang');
+            if (savedLang) {
+                document.documentElement.lang = savedLang;
+            }
+
             const siteLoader = document.getElementById('siteLoaderOverlay');
             const showSiteLoader = () => siteLoader?.classList.add('is-visible');
             const hideSiteLoader = () => siteLoader?.classList.remove('is-visible');
@@ -866,6 +921,7 @@
                 alert: '請以「異常判斷」模式回答，優先檢查指定魚塭是否有水質異常並給出處置建議。',
                 average: '請以「平均溶氧」模式回答，優先查詢指定魚塭最近 7 天或使用者指定天數的平均溶氧。',
                 ponds: '請以「魚塭列表」模式回答，優先列出目前可查詢的魚塭與養殖資訊。',
+                site: '請以「網站服務」模式回答，優先查詢課程、活動、故事、USR 成果、科技專案或聯絡資訊。',
             };
 
             const getMode = () => {
@@ -960,6 +1016,25 @@
                 }
             });
         })();
+
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement({
+                pageLanguage: 'zh-TW',
+                includedLanguages: 'zh-TW,en,ja',
+                autoDisplay: false
+            }, 'google_translate_element');
+            const savedLang = window.localStorage.getItem('fengyun-lang');
+            if (savedLang && savedLang !== 'zh-Hant') {
+                window.setTimeout(() => {
+                    const select = document.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.value = savedLang;
+                        select.dispatchEvent(new Event('change'));
+                    }
+                }, 800);
+            }
+        };
     </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
