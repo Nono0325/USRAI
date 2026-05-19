@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+
+<!-- Dynamic Carousel from Database -->
+<div id="heroCarousel" class="carousel slide carousel-fade mb-0" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        {% for item in carousels %}
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></button>
+        {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+        {% for item in carousels %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            {% if item.image %}
+            {% if item.image|is_video %}<video src="{{ item.image.url }}" autoplay loop muted playsinline  class="d-block w-100" alt="{{ item.title }}"></video>{% else %}<img src="{{ item.image.url }}" class="d-block w-100" alt="{{ item.title }}">{% endif %}
+            {% else %}
+            <img src="https://via.placeholder.com/1920x800.png?text=Image" class="d-block w-100" alt="Placeholder">
+            {% endif %}
+            {% if item.show_title or item.show_subtitle %}
+            <div class="carousel-caption d-none d-md-block pb-5">
+                {% if item.show_title %}
+                <h1 class="display-3 fw-bold">{{ item.title }}</h1>
+                {% endif %}
+                {% if item.show_subtitle and item.subtitle %}
+                <p class="fs-4">{{ item.subtitle }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <!-- Demo Static Slide if empty -->
+        <div class="carousel-item active">
+            <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+                class="d-block w-100" alt="水井村風雲客棧">
+            <div class="carousel-caption pb-5">
+                <h1 class="display-3 fw-bold">水井村風雲客棧</h1>
+                <p class="fs-4">歡迎來到充滿人情味與三生共好的在地聚落</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Quick Portal Nav -->
+<div class="container-fluid bg-white shadow-sm py-4 mb-5">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'inn_app:story_list' %}" class="text-decoration-none">
+                    <div class="p-3 hover-elevate">
+                        <i class="fa-solid fa-book-open fa-2x text-primary mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">地方故事</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'inn_app:usr_showcase' %}" class="text-decoration-none">
+                    <div class="p-3 hover-elevate">
+                        <i class="fa-solid fa-trophy fa-2x text-warning mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">成果展示</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'inn_app:aiot_guide' %}" class="text-decoration-none">
+                    <div class="p-3 hover-elevate">
+                        <i class="fa-solid fa-microchip fa-2x text-success mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">AIoT科技</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'inn_app:workshop_list' %}" class="text-decoration-none">
+                    <div class="p-3 hover-elevate">
+                        <i class="fa-solid fa-hand-holding-heart fa-2x text-danger mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">活動體驗</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Triple Harmony Services Section -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold" style="color: var(--primary-color);">三生共好服務</h2>
+        <p class="text-muted mt-3 fs-5">深耕在地 生產、生活、生命 之美</p>
+        <hr class="w-25 mx-auto">
+    </div>
+    <div class="row g-4 justify-content-center">
+        {% for service in services %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-elevate transition">
+                {% if service.image %}
+                {% if service.image|is_video %}<video src="{{ service.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ service.title }}" style="height: 250px; object-fit: cover;"></video>{% else %}<img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.title }}" style="height: 250px; object-fit: cover;">{% endif %}
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <i class="fa-solid fa-seedling text-success fa-4x"></i>
+                </div>
+                {% endif %}
+                <div class="card-body p-4 text-center">
+                    <h4 class="fw-bold mb-3" style="color: var(--primary-color);">{{ service.title }}</h4>
+                    <div class="text-muted small">
+                        {{ service.description|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- USR & Local Stories Section -->
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6 text-center text-md-start">
+            <h2 class="display-5 fw-bold" style="color: var(--primary-color);">故事牆：在地與師長的努力</h2>
+            <p class="text-muted fs-5">記錄每一點一滴為這片土地付出的真心與汗水。</p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+            <a href="{% url 'inn_app:story_list' %}" class="btn btn-outline-primary rounded-pill px-4">閱讀更多故事 <i
+                    class="fa-solid fa-arrow-right-long ms-2"></i></a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for story in latest_stories %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm overflow-hidden rounded-4">
+                {% if story.image %}
+                <img src="{{ story.image.url }}" class="card-img-top" alt="{{ story.title }}"
+                    style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fa-solid fa-scroll text-secondary fa-3x"></i>
+                </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <span class="badge bg-secondary mb-2">{{ story.get_category_display }}</span>
+                    <h5 class="card-title fw-bold mb-3">{{ story.title }}</h5>
+                    <p class="card-text text-muted mb-4 small">{{ story.content|striptags|truncatewords:20 }}</p>
+                    <a href="{% url 'inn_app:story_detail' story.id %}"
+                        class="text-primary text-decoration-none fw-bold">繼續閱讀 <i
+                            class="fa-solid fa-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- USR Achievements & News Section -->
+<div class="container-fluid bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold" style="color: var(--primary-color);">USR 成果與新聞亮點</h2>
+            <p class="text-muted mt-3">虎科大師生在水井村的豐碩實踐成果。</p>
+        </div>
+        <div class="row g-4">
+            {% for ach in latest_achievements %}
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-white shadow-sm p-3 me-3">
+                            {% if ach.type == 'video' %}<i class="fa-solid fa-play text-danger fa-lg"></i>
+                            {% elif ach.type == 'news' %}<i class="fa-solid fa-newspaper text-primary fa-lg"></i>
+                            {% else %}<i class="fa-solid fa-trophy text-warning fa-lg"></i>{% endif %}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">{{ ach.title }}</h6>
+                            <small class="text-muted">{{ ach.date|date:"Y-m-d" }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">{{ ach.summary|truncatewords:25 }}</p>
+                    {% if ach.external_link %}
+                    <a href="{{ ach.external_link }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill">
+                        查看詳情 <i class="fa-solid fa-up-right-from-square ms-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Tech & AIoT Section -->
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h2 class="display-5 fw-bold" style="color: var(--primary-color);">科技賦能：智慧轉型</h2>
+            <p class="text-muted fs-5 mb-4">我們將 AIoT 與 AR 技術導入水井村，從智慧養殖到互動導覽，實現數位創生。</p>
+            <div class="row g-3">
+                {% for tech in tech_projects %}
+                <div class="col-6">
+                    <div class="p-3 border rounded-3 bg-white hover-shadow transition">
+                        <h6 class="fw-bold mb-1">{{ tech.name|truncatechars:15 }}</h6>
+                        <small class="text-success">{{ tech.get_type_display }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'inn_app:aiot_guide' %}" class="btn btn-primary rounded-pill px-5 mt-4">探索科技應用 <i
+                    class="fa-solid fa-rocket ms-2"></i></a>
+        </div>
+        <div class="col-lg-6 d-none d-lg-block">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                alt="Tech" class="img-fluid rounded-4 shadow">
+        </div>
+    </div>
+</div>
+
+<!-- On Duty Staff Section (Kept from original) -->
+<div class="container-fluid py-5" style="background-color: #E3F2FD; box-shadow: inset 0 10px 20px rgba(0,0,0,0.05);">
+    <div class="container text-center text-lg-start">
+        <div class="row align-items-center">
+            <div class="col-lg-5" style="color: var(--primary-color);">
+                <h3 class="fw-bold mb-3"><i class="fa-solid fa-clipboard-user me-2"></i>今日客棧值班人員</h3>
+                <p class="mb-3">我們親切的在地團隊，隨時為您服務與導覽。</p>
+                <a href="{% url 'inn_app:duty_staff' %}" class="btn btn-outline-primary mt-2 rounded-pill px-4">查看所有排班</a>
+            </div>
+            <div class="col-lg-7 mt-4 mt-lg-0">
+                <div class="row g-3">
+                    {% for staff in duty_staffs %}
+                    <div class="col-md-6">
+                        <div class="card p-3 shadow-sm border-0 d-flex flex-row align-items-center bg-white rounded-4">
+                            <div class="flex-shrink-0 ms-2">
+                                <div class="bg-success rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:50px; height:50px;">
+                                    <i class="fa-solid fa-user-check text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3 flex-grow-1 text-start">
+                                <h5 class="mb-1 fw-bold text-dark">{{ staff.name }}</h5>
+                                <span class="badge bg-secondary mb-1">{{ staff.role }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-elevate {
+        border-radius: 8px;
+        transition: transform 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .hover-elevate:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .hover-shadow:hover {
+        box-shadow: var(--shadow-soft);
+    }
+
+    .transition {
+        transition: all 0.22s ease;
+    }
+</style>
+
+{% endblock %}

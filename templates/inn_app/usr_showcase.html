@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}成果展示 - 風雲客棧數位入口平台{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container mt-4">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold" style="color: var(--primary-color);">成果展示與學術實習</h1>
+            <p class="text-muted">整合虎科大師生與水井村合作的各項新聞、影片與實踐成果。</p>
+        </div>
+
+        <div class="row g-4">
+            {% for ach in achievements %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="row g-0 h-100">
+                        <div class="col-md-4">
+                            {% if ach.image %}
+                            {% if ach.image|is_video %}<video src="{{ ach.image.url }}" autoplay loop muted playsinline  class="img-fluid h-100" alt="{{ ach.title }}" style="object-fit: cover;"></video>{% else %}<img src="{{ ach.image.url }}" class="img-fluid h-100" alt="{{ ach.title }}" style="object-fit: cover;">{% endif %}
+                            {% else %}
+                            <div class="bg-dark bg-opacity-10 d-flex align-items-center justify-content-center h-100">
+                                {% if ach.type == 'video' %}<i class="fa-solid fa-circle-play text-danger fa-4x"></i>
+                                {% elif ach.type == 'news' %}<i class="fa-solid fa-paper-plane text-primary fa-4x"></i>
+                                {% else %}<i class="fa-solid fa-trophy text-warning fa-4x"></i>{% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body p-4 d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge {% if ach.type == 'video' %}bg-danger{% elif ach.type == 'news' %}bg-primary{% else %}bg-warning text-dark{% endif %} px-3">{{ ach.get_type_display }}</span>
+                                    <small class="text-muted">{{ ach.date|date:"Y-m-d" }}</small>
+                                </div>
+                                <h4 class="fw-bold mb-3">{{ ach.title }}</h4>
+                                <p class="text-muted small mb-4 flex-grow-1">{{ ach.summary }}</p>
+                                {% if ach.external_link %}
+                                <a href="{{ ach.external_link }}" target="_blank" class="btn btn-outline-dark rounded-pill">
+                                    <i class="fa-solid fa-arrow-up-right-from-square me-2"></i>前往查看
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p>目前尚無成果展示內容。</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

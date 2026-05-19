@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}關於風雲客棧 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container mt-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4" style="color: var(--primary-color);">關於風雲客棧</h1>
+                <p class="lead mb-4">
+                    水井村風雲客棧座落於純樸的鄉村之中，我們致力於推廣「三生共好」：生態保育、生產永續、生活藝術。
+                </p>
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fa-solid fa-leaf text-success me-2"></i>生態 (Ecology)</h5>
+                    <p>保護水井村的自然景觀，維護多樣化的生態系統，讓每一位訪客都能感受到大自然的原始魅力。</p>
+                </div>
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fa-solid fa-wheat-awn text-warning me-2"></i>生產 (Production)</h5>
+                    <p>支持在地小農與手作工藝，透過友善耕作與公平交易，實現地方產業的可持續發展。</p>
+                </div>
+                <div class="mb-4">
+                    <h5 class="fw-bold"><i class="fa-solid fa-house-user text-primary me-2"></i>生活 (Life)</h5>
+                    <p>重拾緩慢而深刻的生活步調，體驗充滿溫度的人際互動與豐富的文化底蘊。</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1542314831-c6a4d14effb0?q=80&w=1200&auto=format&fit=crop" class="img-fluid" alt="關於風雲客棧">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

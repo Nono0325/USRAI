@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & OpenGraph Meta Tags for Line/FB Sharing -->
+    {% block seo_meta %}
+    <meta property="og:title" content="水井村風雲客棧 - 體驗最真實的三生共好">
+    <meta property="og:description" content="傳承在地三生共好，歡迎來到風雲客棧體驗真實的生態、生產、生活之美。立即進來網頁預約專屬活動！">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1542314831-c6a4d14effb0?q=80&w=1200&auto=format&fit=crop">
+    <meta property="og:site_name" content="水井村風雲客棧">
+    <meta name="description" content="水井村風雲客棧數位入口平台，整合在地故事、USR 成果與智慧科技，帶您體驗最真實的三生共好。">
+    {% endblock %}
+    
+    <title>{% block title %}水井村風雲客棧{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1f7a4d;
+            --secondary-color: #48a868;
+            --accent-color: #2563eb;
+            --warm-color: #f59e0b;
+            --ink-color: #17231d;
+            --muted-color: #64746b;
+            --surface-color: rgba(255, 255, 255, 0.86);
+            --surface-solid: #ffffff;
+            --page-bg: #f7faf4;
+            --border-soft: rgba(31, 122, 77, 0.14);
+            --shadow-soft: 0 16px 38px rgba(23, 35, 29, 0.09);
+            --shadow-lift: 0 24px 54px rgba(23, 35, 29, 0.14);
+        }
+        * {
+            letter-spacing: 0;
+        }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(72, 168, 104, 0.14), transparent 28rem),
+                radial-gradient(circle at 92% 12%, rgba(37, 99, 235, 0.09), transparent 25rem),
+                linear-gradient(180deg, #fbfdf8 0%, var(--page-bg) 46%, #f4f8ee 100%);
+            color: var(--ink-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            text-rendering: optimizeLegibility;
+        }
+        main {
+            flex: 1 0 auto;
+            overflow: hidden;
+        }
+        .navbar {
+            background:
+                linear-gradient(135deg, rgba(26, 111, 69, 0.96), rgba(45, 132, 73, 0.94)),
+                rgba(31, 122, 77, 0.94) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 12px 30px rgba(19, 78, 47, 0.18);
+            padding: 0.72rem 0;
+        }
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .nav-link {
+            position: relative;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+        .nav-link:hover {
+            color: #fff !important;
+            transform: translateY(-1px);
+        }
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0.5rem;
+            right: 0.5rem;
+            bottom: 0.18rem;
+            height: 2px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.18s ease;
+        }
+        .nav-link:hover::after {
+            transform: scaleX(1);
+        }
+        .dropdown-menu {
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 8px;
+            padding: 0.55rem;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: var(--shadow-soft);
+        }
+        .dropdown-item {
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .dropdown-item:hover {
+            background: rgba(31, 122, 77, 0.1);
+            color: var(--primary-color);
+        }
+        .footer {
+            flex-shrink: 0;
+            background:
+                linear-gradient(135deg, rgba(23, 82, 52, 0.98), rgba(31, 122, 77, 0.98)),
+                var(--primary-color);
+            color: white;
+            padding: 3rem 0 2rem 0;
+            margin-top: 3rem;
+            box-shadow: 0 -16px 36px rgba(23, 35, 29, 0.08);
+        }
+        
+        /* Modern Cards */
+        .card {
+            border: 1px solid var(--border-soft);
+            border-radius: 8px;
+            background: var(--surface-color);
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(31, 122, 77, 0.24);
+            box-shadow: var(--shadow-lift);
+        }
+        .card-img-top,
+        .card video {
+            transition: transform 0.36s ease, filter 0.36s ease;
+        }
+        .card:hover .card-img-top,
+        .card:hover video {
+            transform: scale(1.035);
+            filter: saturate(1.06);
+        }
+        .btn {
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-color: transparent;
+            box-shadow: 0 10px 22px rgba(31, 122, 77, 0.22);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #17663f, #43a662);
+            border-color: transparent;
+            box-shadow: 0 14px 28px rgba(31, 122, 77, 0.3);
+        }
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: rgba(31, 122, 77, 0.45);
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(31, 122, 77, 0.22);
+        }
+        .badge {
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        .form-control {
+            border-radius: 8px;
+            border-color: rgba(31, 122, 77, 0.16);
+        }
+        .form-control:focus {
+            border-color: rgba(31, 122, 77, 0.58);
+            box-shadow: 0 0 0 0.22rem rgba(31, 122, 77, 0.13);
+        }
+
+        /* Carousel specific override */
+        .carousel {
+            box-shadow: 0 18px 44px rgba(23, 35, 29, 0.14);
+        }
+        .carousel-item img {
+            object-fit: cover;
+            height: clamp(420px, 64vh, 720px);
+            filter: brightness(0.74) saturate(1.08);
+        }
+        .carousel-item video {
+            object-fit: cover;
+            height: clamp(420px, 64vh, 720px);
+            filter: brightness(0.74) saturate(1.08);
+        }
+        .carousel-caption {
+            bottom: 18%;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.48);
+        }
+        .carousel-caption h1 {
+            font-weight: 900;
+        }
+        .carousel-caption p {
+            max-width: 720px;
+            margin-inline: auto;
+        }
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 2.4rem;
+            height: 2.4rem;
+            padding: 1.35rem;
+            border-radius: 50%;
+            background-color: rgba(15, 23, 42, 0.24);
+            background-size: 56%;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* Search bar placeholder color */
+        .placeholder-light::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .container-fluid.bg-white.shadow-sm.py-4.mb-5 {
+            background: rgba(255, 255, 255, 0.82) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(31, 122, 77, 0.08);
+        }
+        .hover-elevate {
+            border-radius: 8px;
+            transition: transform 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        .hover-elevate:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: var(--shadow-soft);
+        }
+        .container.py-5,
+        section.py-5,
+        .bg-light.py-5,
+        .container-fluid.bg-light.py-5 {
+            position: relative;
+        }
+        .bg-light,
+        .container-fluid.bg-light.py-5,
+        .bg-light.py-5 {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(238, 247, 234, 0.72)) !important;
+        }
+        h1.display-4,
+        h1.display-5,
+        h2.display-5 {
+            color: var(--ink-color);
+            letter-spacing: 0;
+        }
+        h1.display-4::after,
+        h1.display-5::after,
+        h2.display-5::after {
+            content: "";
+            display: block;
+            width: 72px;
+            height: 4px;
+            margin: 14px auto 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        .text-md-start h2.display-5::after,
+        .text-lg-start h3::after {
+            margin-left: 0;
+        }
+        .lead,
+        .text-muted {
+            color: var(--muted-color) !important;
+        }
+        .input-group {
+            border: 1px solid rgba(31, 122, 77, 0.12);
+        }
+        .page-link {
+            color: var(--primary-color);
+            border-color: rgba(31, 122, 77, 0.16);
+            box-shadow: 0 6px 16px rgba(23, 35, 29, 0.06);
+        }
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.52s ease, transform 0.52s ease;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .aqua-chat-launcher {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 62px;
+            height: 62px;
+            border: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0f766e, #2563eb);
+            color: #fff;
+            box-shadow: 0 14px 32px rgba(15, 118, 110, 0.35);
+            z-index: 1080;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+        }
+        .aqua-chat-launcher:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 38px rgba(37, 99, 235, 0.38);
+        }
+        .aqua-chat-panel {
+            position: fixed;
+            right: 24px;
+            bottom: 98px;
+            width: min(380px, calc(100vw - 32px));
+            height: min(560px, calc(100vh - 132px));
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 22px 54px rgba(15, 23, 42, 0.25);
+            z-index: 1079;
+        }
+        .aqua-chat-panel.is-open {
+            display: flex;
+        }
+        .aqua-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(15, 118, 110, 0.92);
+            color: #fff;
+        }
+        .aqua-chat-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            font-weight: 700;
+        }
+        .aqua-chat-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .aqua-chat-icon-btn {
+            width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .aqua-chat-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .aqua-chat-message {
+            margin-bottom: 12px;
+            line-height: 1.55;
+        }
+        .aqua-chat-message.is-user {
+            text-align: right;
+        }
+        .aqua-chat-bubble {
+            display: inline-block;
+            max-width: 86%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            white-space: pre-wrap;
+            text-align: left;
+            word-break: break-word;
+        }
+        .aqua-chat-message.is-user .aqua-chat-bubble {
+            background: #2563eb;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .aqua-chat-message.is-bot .aqua-chat-bubble {
+            background: rgba(248, 250, 252, 0.92);
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+        }
+        .aqua-chat-message.is-error .aqua-chat-bubble {
+            background: rgba(254, 226, 226, 0.95);
+            color: #991b1b;
+        }
+        .aqua-chat-typing {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 54px;
+        }
+        .aqua-chat-typing span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #64748b;
+            animation: aquaTyping 1.05s infinite ease-in-out;
+        }
+        .aqua-chat-typing span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        .aqua-chat-typing span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        @keyframes aquaTyping {
+            0%, 80%, 100% {
+                transform: translateY(0);
+                opacity: 0.45;
+            }
+            40% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+        .aqua-chat-mode-wrap {
+            padding: 12px 12px 0;
+            background: rgba(255, 255, 255, 0.72);
+        }
+        .aqua-chat-modes {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            padding: 4px;
+            border: 1px solid rgba(15, 118, 110, 0.18);
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.08);
+            overflow: hidden;
+        }
+        .aqua-chat-mode-indicator {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc((100% - 8px) / 4);
+            height: calc(100% - 8px);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #0f766e, #2563eb);
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+            transition: transform 0.24s ease;
+            pointer-events: none;
+        }
+        .aqua-chat-modes[data-active="quality"] .aqua-chat-mode-indicator {
+            transform: translateX(0%);
+        }
+        .aqua-chat-modes[data-active="alert"] .aqua-chat-mode-indicator {
+            transform: translateX(100%);
+        }
+        .aqua-chat-modes[data-active="average"] .aqua-chat-mode-indicator {
+            transform: translateX(200%);
+        }
+        .aqua-chat-modes[data-active="ponds"] .aqua-chat-mode-indicator {
+            transform: translateX(300%);
+        }
+        .aqua-chat-mode {
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+        }
+        .aqua-chat-mode input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .aqua-chat-mode span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-height: 34px;
+            padding: 0 8px;
+            border-radius: 999px;
+            color: #0f3f3a;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+        .aqua-chat-mode input:checked + span {
+            color: #fff;
+        }
+        .aqua-chat-mode input:focus-visible + span {
+            outline: 2px solid rgba(37, 99, 235, 0.45);
+            outline-offset: 3px;
+        }
+        .aqua-chat-mode:hover span {
+            transform: translateY(-1px);
+        }
+        .aqua-chat-form {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.72);
+        }
+        .aqua-chat-input {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            border-radius: 999px;
+            padding: 10px 14px;
+            outline: 0;
+        }
+        .aqua-chat-send {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 50%;
+            background: #0f766e;
+            color: #fff;
+            flex: 0 0 auto;
+        }
+        .aqua-chat-send:disabled {
+            opacity: 0.55;
+        }
+        @media (max-width: 575.98px) {
+            .aqua-chat-launcher {
+                right: 16px;
+                bottom: 16px;
+            }
+            .aqua-chat-panel {
+                right: 12px;
+                bottom: 86px;
+                width: calc(100vw - 24px);
+                height: min(560px, calc(100vh - 106px));
+            }
+            .aqua-chat-mode span {
+                gap: 0;
+                padding: 0 4px;
+                font-size: 0.7rem;
+            }
+            .aqua-chat-mode span i {
+                display: none;
+            }
+        }
+
+        .site-loader-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(214, 239, 216, 0.92), rgba(250, 249, 246, 0.88) 44%, rgba(15, 23, 42, 0.18));
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .site-loader-overlay.is-visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .site-loader-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 26px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.58);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 24px 58px rgba(15, 23, 42, 0.2);
+        }
+        .site-loader {
+            position: relative;
+            width: 92px;
+            height: 92px;
+        }
+        .site-loader::before,
+        .site-loader::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 8px solid transparent;
+        }
+        .site-loader::before {
+            border-top-color: #2e7d32;
+            border-right-color: #43a047;
+            animation: siteLoaderSpin 1.05s linear infinite;
+        }
+        .site-loader::after {
+            inset: 16px;
+            border-bottom-color: #2563eb;
+            border-left-color: #0f766e;
+            animation: siteLoaderSpin 0.8s linear infinite reverse;
+        }
+        .site-loader-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2e7d32;
+            box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.36);
+            transform: translate(-50%, -50%);
+            animation: siteLoaderPulse 1.1s ease-in-out infinite;
+        }
+        .site-loader-text {
+            margin: 0;
+            color: #17423a;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        @keyframes siteLoaderSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes siteLoaderPulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(0.86);
+                box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.36);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 16px rgba(46, 125, 50, 0);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .site-loader::before,
+            .site-loader::after,
+            .site-loader-core,
+            .aqua-chat-typing span,
+            .aqua-chat-mode-indicator {
+                animation: none;
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="site-loader-overlay is-visible" id="siteLoaderOverlay" role="status" aria-live="polite" aria-label="頁面載入中">
+        <div class="site-loader-card">
+            <div class="site-loader" aria-hidden="true">
+                <span class="site-loader-core"></span>
+            </div>
+            <p class="site-loader-text">載入中...</p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'inn_app:home' %}"><i class="fa-solid fa-house-chimney me-2"></i>水井村風雲客棧</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto fs-5 align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inn_app:home' %}">首頁</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">關於風雲客棧</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'inn_app:story_list' %}">故事牆</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inn_app:usr_showcase' %}">成果展示</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">客棧活動</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'inn_app:event_list' %}">活動資訊</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inn_app:course_list' %}">報名課程</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inn_app:workshop_list' %}">體驗工作坊</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'inn_app:calendar' %}">客棧日曆</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inn_app:aiot_guide' %}">AIoT科技</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inn_app:contact' %}">聯絡我們</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <form action="{% url 'inn_app:search' %}" method="get" class="d-flex align-items-center bg-white bg-opacity-10 rounded-pill px-2 py-1 shadow-sm border border-secondary">
+                            <input type="text" name="q" class="form-control form-control-sm bg-transparent border-0 text-white placeholder-light" placeholder="搜尋..." style="width: 120px; outline: none; box-shadow: none;">
+                            <button type="submit" class="btn btn-sm text-white p-0 ps-1 pe-2">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </form>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-outline-light btn-sm rounded-pill px-3 py-1 mt-md-0 mt-2 hover-elevate shadow-sm" href="{% url 'inn_app:my_bookings' %}">
+                            <i class="fa-solid fa-calendar-check me-1"></i>查詢報名
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer text-center">
+        <div class="container">
+            <h5 class="fw-bold">水井村風雲客棧</h5>
+            <p>傳承在地三生共好，體驗真實的生態與生產之美</p>
+            <hr class="w-25 mx-auto">
+            <small>&copy; 2026 水井村風雲客棧. All Rights Reserved. <span style="opacity: 0.15; font-size: 0.65rem; margin-left: 10px; vertical-align: middle; user-select: none; pointer-events: none;" title="Developer Signature">NonoWuW</span></small>
+        </div>
+    </footer>
+    <!-- Crafted with ❤️ by NonoWuW -->
+
+    <section class="aqua-chat-panel" id="aquaChatPanel" aria-live="polite">
+        <div class="aqua-chat-header">
+            <div class="aqua-chat-title">
+                <i class="fa-solid fa-water"></i>
+                <span>水井智慧養殖 AI</span>
+            </div>
+            <div class="aqua-chat-actions">
+                <button class="aqua-chat-icon-btn" type="button" id="aquaChatReset" aria-label="清除對話" title="清除對話">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button class="aqua-chat-icon-btn" type="button" id="aquaChatClose" aria-label="關閉" title="關閉">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <div class="aqua-chat-log" id="aquaChatLog"></div>
+        <div class="aqua-chat-mode-wrap">
+            <div class="aqua-chat-modes" id="aquaChatModes" data-active="quality" role="radiogroup" aria-label="聊天模式">
+                <span class="aqua-chat-mode-indicator" aria-hidden="true"></span>
+                <label class="aqua-chat-mode">
+                    <input type="radio" name="aqua-chat-mode" value="quality" checked>
+                    <span><i class="fa-solid fa-droplet"></i>水質</span>
+                </label>
+                <label class="aqua-chat-mode">
+                    <input type="radio" name="aqua-chat-mode" value="alert">
+                    <span><i class="fa-solid fa-triangle-exclamation"></i>異常</span>
+                </label>
+                <label class="aqua-chat-mode">
+                    <input type="radio" name="aqua-chat-mode" value="average">
+                    <span><i class="fa-solid fa-chart-line"></i>平均</span>
+                </label>
+                <label class="aqua-chat-mode">
+                    <input type="radio" name="aqua-chat-mode" value="ponds">
+                    <span><i class="fa-solid fa-list"></i>魚塭</span>
+                </label>
+            </div>
+        </div>
+        <form class="aqua-chat-form" id="aquaChatForm">
+            <input class="aqua-chat-input" id="aquaChatInput" type="text" placeholder="問水質狀態，例如：1 號池現在正常嗎？" autocomplete="off">
+            <button class="aqua-chat-send" id="aquaChatSend" type="submit" aria-label="送出">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </section>
+    <button class="aqua-chat-launcher" id="aquaChatLauncher" type="button" aria-label="開啟水井智慧養殖 AI">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (() => {
+            const siteLoader = document.getElementById('siteLoaderOverlay');
+            const showSiteLoader = () => siteLoader?.classList.add('is-visible');
+            const hideSiteLoader = () => siteLoader?.classList.remove('is-visible');
+
+            window.addEventListener('load', () => {
+                window.setTimeout(hideSiteLoader, 220);
+            });
+            window.addEventListener('pageshow', hideSiteLoader);
+            window.addEventListener('beforeunload', showSiteLoader);
+
+            document.addEventListener('click', (event) => {
+                const link = event.target.closest('a[href]');
+                if (!link) return;
+                const href = link.getAttribute('href') || '';
+                const target = link.getAttribute('target');
+                const isModifiedClick = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+                const isSamePageAnchor = href.startsWith('#');
+                const isScript = href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:');
+                if (!isModifiedClick && !target && !isSamePageAnchor && !isScript) {
+                    showSiteLoader();
+                }
+            });
+
+            document.addEventListener('submit', (event) => {
+                if (event.target.id !== 'aquaChatForm') {
+                    showSiteLoader();
+                }
+            });
+
+            const revealItems = document.querySelectorAll(
+                '.card, .container > .text-center, .container > .row, .carousel-caption, .input-group'
+            );
+            if ('IntersectionObserver' in window) {
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            revealObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.12 });
+
+                revealItems.forEach((item, index) => {
+                    item.classList.add('reveal-on-scroll');
+                    item.style.transitionDelay = `${Math.min(index % 6, 5) * 45}ms`;
+                    revealObserver.observe(item);
+                });
+            } else {
+                revealItems.forEach((item) => item.classList.add('is-visible'));
+            }
+
+            const panel = document.getElementById('aquaChatPanel');
+            const launcher = document.getElementById('aquaChatLauncher');
+            const closeBtn = document.getElementById('aquaChatClose');
+            const resetBtn = document.getElementById('aquaChatReset');
+            const form = document.getElementById('aquaChatForm');
+            const input = document.getElementById('aquaChatInput');
+            const sendBtn = document.getElementById('aquaChatSend');
+            const log = document.getElementById('aquaChatLog');
+            const modes = document.getElementById('aquaChatModes');
+            let hasIntro = false;
+
+            const modePrompts = {
+                quality: '請以「最新水質查詢」模式回答，優先查詢指定魚塭最新水溫、pH、溶氧、鹽度。',
+                alert: '請以「異常判斷」模式回答，優先檢查指定魚塭是否有水質異常並給出處置建議。',
+                average: '請以「平均溶氧」模式回答，優先查詢指定魚塭最近 7 天或使用者指定天數的平均溶氧。',
+                ponds: '請以「魚塭列表」模式回答，優先列出目前可查詢的魚塭與養殖資訊。',
+            };
+
+            const getMode = () => {
+                const selected = modes.querySelector('input[name="aqua-chat-mode"]:checked');
+                return selected ? selected.value : 'quality';
+            };
+
+            modes.addEventListener('change', (event) => {
+                if (event.target.matches('input[name="aqua-chat-mode"]')) {
+                    modes.dataset.active = event.target.value;
+                }
+            });
+
+            const addMessage = (body, kind = 'bot', options = {}) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `aqua-chat-message is-${kind}`;
+                const bubble = document.createElement('div');
+                bubble.className = 'aqua-chat-bubble';
+                if (options.typing) {
+                    bubble.innerHTML = '<span class="aqua-chat-typing" aria-label="AI 正在輸入"><span></span><span></span><span></span></span>';
+                } else {
+                    bubble.textContent = body;
+                }
+                wrapper.appendChild(bubble);
+                log.appendChild(wrapper);
+                log.scrollTop = log.scrollHeight;
+                return wrapper;
+            };
+
+            const openPanel = () => {
+                panel.classList.add('is-open');
+                if (!hasIntro) {
+                    addMessage('可以問我魚塭最新水質、平均溶氧或異常判斷。');
+                    hasIntro = true;
+                }
+                window.setTimeout(() => input.focus(), 50);
+            };
+
+            const closePanel = () => panel.classList.remove('is-open');
+
+            launcher.addEventListener('click', () => {
+                if (panel.classList.contains('is-open')) {
+                    closePanel();
+                } else {
+                    openPanel();
+                }
+            });
+            closeBtn.addEventListener('click', closePanel);
+
+            resetBtn.addEventListener('click', async () => {
+                log.textContent = '';
+                hasIntro = false;
+                try {
+                    await fetch('/api/chat/reset/', { method: 'POST' });
+                } catch (err) {
+                    addMessage(`清除對話失敗：${err.message}`, 'error');
+                }
+                openPanel();
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const message = input.value.trim();
+                if (!message) return;
+
+                addMessage(message, 'user');
+                input.value = '';
+                sendBtn.disabled = true;
+                const typingMessage = addMessage('', 'bot', { typing: true });
+                const selectedMode = getMode();
+                const outgoingMessage = `${modePrompts[selectedMode]}\n\n使用者問題：${message}`;
+
+                try {
+                    const response = await fetch('/api/chat/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: outgoingMessage }),
+                    });
+                    const data = await response.json();
+                    typingMessage.remove();
+                    if (response.ok) {
+                        addMessage(data.reply || '目前沒有回覆。');
+                    } else {
+                        addMessage(data.error || 'AI 助理暫時無法回應。', 'error');
+                    }
+                } catch (err) {
+                    typingMessage.remove();
+                    addMessage(`連線失敗：${err.message}`, 'error');
+                } finally {
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

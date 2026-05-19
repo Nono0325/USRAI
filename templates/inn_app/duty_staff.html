@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}客棧值班人員 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="bg-white py-5">
+    <div class="container text-center mb-5">
+        <h1 class="display-4 fw-bold text-dark">客棧值班人員</h1>
+        <p class="lead text-muted">尋找我們的專業職人與導覽服務人員</p>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="table-responsive bg-white rounded-4 shadow-sm">
+                    <table class="table table-hover table-borderless align-middle mb-0">
+                        <thead class="bg-light text-muted fw-bold">
+                            <tr>
+                                <th scope="col" class="py-3 px-4 rounded-start-4">狀態</th>
+                                <th scope="col" class="py-3">姓名</th>
+                                <th scope="col" class="py-3">職稱</th>
+                                <th scope="col" class="py-3 px-4 rounded-end-4">聯絡資訊</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in staffs %}
+                            <tr class="border-bottom {% if staff.is_on_duty %}bg-success-subtle{% endif %}">
+                                <td class="py-4 px-4">
+                                    {% if staff.is_on_duty %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i>今日當班</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2"><i class="fa-regular fa-calendar-minus me-1"></i>未排班</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 fw-bold fs-5 text-dark">{{ staff.name }}</td>
+                                <td class="py-4 text-muted">{{ staff.role }}</td>
+                                <td class="py-4 px-4 text-secondary">
+                                    {% if staff.contact %}
+                                    <i class="fa-solid fa-phone me-2"></i>{{ staff.contact }}
+                                    {% else %}
+                                    --
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">目前沒有人員資料，請從後台新增。</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

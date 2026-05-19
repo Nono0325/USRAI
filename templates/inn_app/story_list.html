@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}故事牆 - 風雲客棧數位入口平台{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container mt-4">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold" style="color: var(--primary-color);">故事牆</h1>
+            <p class="text-muted">在地人的奮鬥、USR團隊的努力，每一則故事都值得被記住。</p>
+        </div>
+
+        <div class="d-flex justify-content-center mb-5">
+            <div class="btn-group shadow-sm rounded-pill bg-white p-1">
+                <a href="{% url 'inn_app:story_list' %}" class="btn {% if not active_cat %}btn-primary{% else %}btn-link text-dark{% endif %} rounded-pill px-4">全部</a>
+                <a href="{% url 'inn_app:story_list' %}?cat=local" class="btn {% if active_cat == 'local' %}btn-primary{% else %}btn-link text-dark{% endif %} rounded-pill px-4">在地故事</a>
+                <a href="{% url 'inn_app:story_list' %}?cat=usr" class="btn {% if active_cat == 'usr' %}btn-primary{% else %}btn-link text-dark{% endif %} rounded-pill px-4">USR推動</a>
+                <a href="{% url 'inn_app:story_list' %}?cat=achievement" class="btn {% if active_cat == 'achievement' %}btn-primary{% else %}btn-link text-dark{% endif %} rounded-pill px-4">師生表現</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for story in page_obj %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                    {% if story.image %}
+                    {% if story.image|is_video %}<video src="{{ story.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ story.title }}" style="height: 220px; object-fit: cover;"></video>{% else %}<img src="{{ story.image.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 220px; object-fit: cover;">{% endif %}
+                    {% else %}
+                    <div class="bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 220px;">
+                        <i class="fa-solid fa-feather-pointed text-primary fa-4x"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <span class="badge bg-secondary mb-3">{{ story.get_category_display }}</span>
+                        <h4 class="card-title fw-bold mb-3">{{ story.title }}</h4>
+                        <p class="card-text text-muted mb-4">{{ story.content|striptags|truncatewords:25 }}</p>
+                        <a href="{% url 'inn_app:story_detail' story.id %}" class="btn btn-outline-primary rounded-pill w-100">閱讀故事 <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">目前尚無此類別的故事。</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% for i in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                    <a class="page-link rounded-circle mx-1" href="?page={{ i }}{% if active_cat %}&cat={{ active_cat }}{% endif %}">{{ i }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

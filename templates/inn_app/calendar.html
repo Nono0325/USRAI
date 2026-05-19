@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}客棧動態日曆 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="bg-light py-5 min-vh-100">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-dark">客棧動態日曆</h1>
+            <div class="mx-auto" style="width: 50px; height: 3px; background-color: var(--primary-color);"></div>
+            <p class="lead text-muted mt-3">快速掌握客棧最新體驗行程，一鍵跳轉查看與報名</p>
+        </div>
+        
+        <div id="calendar" class="p-4 bg-white rounded-4 shadow-lg border border-light"></div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'inn_app:course_list' %}" class="btn btn-outline-primary rounded-pill px-5 btn-lg">查看所有客棧課程</a>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    if (calendarEl) {
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          themeSystem: 'bootstrap5',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+          },
+          locale: 'zh-tw',
+          events: '/api/courses/events/',
+          height: 'auto'
+        });
+        calendar.render();
+    }
+});
+</script>
+{% endblock %}

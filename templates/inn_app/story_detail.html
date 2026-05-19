@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ story.title }} - 風雲客棧故事牆{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inn_app:home' %}">首頁</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inn_app:story_list' %}">故事牆</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ story.title }}</li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow-lg p-5 rounded-4 border-0">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="badge bg-primary rounded-pill px-4 py-2 me-3 fs-6">
+                            {{ story.get_category_display }}
+                        </span>
+                        <h1 class="display-6 fw-bold mb-0 text-dark">{{ story.title }}</h1>
+                    </div>
+                    
+                    {% if story.image %}
+                    <div class="mb-5">
+                        {% if story.image|is_video %}<video src="{{ story.image.url }}" autoplay loop muted playsinline  class="img-fluid rounded-4 shadow-sm" alt="{{ story.title }}"></video>{% else %}<img src="{{ story.image.url }}" class="img-fluid rounded-4 shadow-sm" alt="{{ story.title }}">{% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="story-content lead fs-5" style="line-height: 2.2; color: #444;">
+                        {{ story.content|safe }}
+                    </div>
+                    
+                    <div class="mt-5 text-center">
+                        <a href="{% url 'inn_app:story_list' %}" class="btn btn-outline-primary rounded-pill px-5">
+                            <i class="fa-solid fa-arrow-left me-2"></i>返回故事牆
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

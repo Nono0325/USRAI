@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}搜尋結果 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="min-height: 70vh;">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="fw-bold mb-3"><i class="fa-solid fa-magnifying-glass me-2"></i>搜尋結果</h2>
+            <p class="text-muted fs-5">
+                {% if query %}
+                    關鍵字「<span class="text-primary fw-bold">{{ query }}</span>」的搜尋結果，共找到 {{ total_count }} 筆。
+                {% else %}
+                    請輸入關鍵字進行搜尋。
+                {% endif %}
+            </p>
+            <hr class="w-25 mx-auto">
+        </div>
+    </div>
+
+    {% if total_count > 0 %}
+        <!-- Stories Section -->
+        {% if results.stories %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-primary ps-3 mb-4 fw-bold">在地故事 & USR 歷程</h3>
+            <div class="row g-4">
+                {% for story in results.stories %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if story.image %}
+                        {% if story.image|is_video %}<video src="{{ story.image.url }}" autoplay loop muted playsinline  class="card-img-top" style="height: 200px; object-fit: cover;"></video>{% else %}<img src="{{ story.image.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 200px; object-fit: cover;">{% endif %}
+                        {% endif %}
+                        <div class="card-body">
+                            <span class="badge bg-secondary mb-2">{{ story.get_category_display }}</span>
+                            <h5 class="card-title fw-bold">{{ story.title }}</h5>
+                            <p class="card-text text-muted small">{{ story.content|striptags|truncatechars:80 }}</p>
+                            <a href="{% url 'inn_app:story_detail' story.id %}" class="btn btn-sm btn-outline-primary mt-auto">閱讀更多</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Courses Section -->
+        {% if results.courses %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-success ps-3 mb-4 fw-bold">報名課程</h3>
+            <div class="row g-4">
+                {% for course in results.courses %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if course.image %}
+                        {% if course.image|is_video %}<video src="{{ course.image.url }}" autoplay loop muted playsinline  class="card-img-top" style="height: 200px; object-fit: cover;"></video>{% else %}<img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;">{% endif %}
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                            <p class="text-muted small mb-2"><i class="fa-solid fa-user-tie me-1"></i>{{ course.instructor }}</p>
+                            <p class="card-text text-muted small">{{ course.description|striptags|truncatechars:80 }}</p>
+                            <a href="{% url 'inn_app:course_detail' course.id %}" class="btn btn-sm btn-success mt-auto text-white">查看詳情 & 報名</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Events Section -->
+        {% if results.events %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-info ps-3 mb-4 fw-bold">活動資訊</h3>
+            <div class="row g-4">
+                {% for event in results.events %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-info">{{ event.title }}</h5>
+                            <p class="text-muted small mb-2"><i class="fa-solid fa-calendar-days me-1"></i>{{ event.date }}</p>
+                            <p class="card-text text-muted small">{{ event.description|truncatechars:100 }}</p>
+                            <a href="{% url 'inn_app:event_detail' event.id %}" class="btn btn-sm btn-outline-info mt-auto">詳細資訊</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Achievements Section -->
+        {% if results.achievements %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-warning ps-3 mb-4 fw-bold">USR 成果展示</h3>
+            <div class="row g-4">
+                {% for ach in results.achievements %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if ach.image %}
+                        {% if ach.image|is_video %}<video src="{{ ach.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ ach.title }}" style="height: 180px; object-fit: cover;"></video>{% else %}<img src="{{ ach.image.url }}" class="card-img-top" alt="{{ ach.title }}" style="height: 180px; object-fit: cover;">{% endif %}
+                        {% endif %}
+                        <div class="card-body">
+                             <span class="badge bg-warning text-dark mb-2">{{ ach.get_type_display }}</span>
+                            <h5 class="card-title fw-bold">{{ ach.title }}</h5>
+                            <p class="card-text text-muted small">{{ ach.summary|truncatechars:80 }}</p>
+                            <a href="{% url 'inn_app:usr_showcase' %}" class="btn btn-sm btn-outline-warning mt-auto text-dark">前往成果頁</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Tech Projects Section -->
+        {% if results.tech_projects %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-dark ps-3 mb-4 fw-bold">科技特色項目</h3>
+            <div class="row g-4">
+                {% for proj in results.tech_projects %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-dark">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ proj.name }}</h5>
+                            <p class="card-text text-muted small">{{ proj.description|striptags|truncatechars:100 }}</p>
+                            <a href="{% url 'inn_app:aiot_guide' %}" class="btn btn-sm btn-dark mt-auto">查看科技導覽</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Workshops Section -->
+        {% if results.workshops %}
+        <section class="mb-5">
+            <h3 class="border-start border-4 border-danger ps-3 mb-4 fw-bold">體驗工作坊</h3>
+            <div class="row g-4">
+                {% for item in results.workshops %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if item.image %}
+                        {% if item.image|is_video %}<video src="{{ item.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ item.name }}" style="height: 150px; object-fit: cover;"></video>{% else %}<img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 150px; object-fit: cover;">{% endif %}
+                        {% endif %}
+                        <div class="card-body">
+                            <span class="badge bg-danger mb-2">{{ item.category }}</span>
+                            <h5 class="card-title fw-bold">{{ item.name }}</h5>
+                            <p class="card-text text-muted small">{{ item.description|truncatechars:80 }}</p>
+                            <a href="{% url 'inn_app:workshop_list' %}" class="btn btn-sm btn-outline-danger mt-auto">詳細課程</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+    {% elif query %}
+        <div class="text-center py-5">
+            <i class="fa-solid fa-face-frown fa-4x text-muted mb-3"></i>
+            <h3>找不到相關結果</h3>
+            <p class="text-muted">試試看不同的關鍵字，或者瀏覽我們的熱門類別。</p>
+            <a href="{% url 'inn_app:home' %}" class="btn btn-primary mt-3">回到首頁</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}

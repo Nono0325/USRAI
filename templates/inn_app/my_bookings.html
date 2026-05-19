@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}查詢報到與取消 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold mb-4 text-center"><i class="fa-solid fa-magnifying-glass me-2"></i>查詢報名紀錄</h1>
+            <p class="text-center text-muted mb-5 lh-lg">請輸入您報名時使用的電話與 Email 進行查詢。<br>為了保護您的隱私資料，兩項資料必須完全相符才能為您調出紀錄卡片。</p>
+
+            <div class="card shadow-lg border-0 rounded-4 mb-5" style="background-color: white;">
+                <div class="card-body p-5">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="phone" class="form-label lh-base fw-bold">聯絡電話 <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control form-control-lg bg-light" id="phone" name="phone" required placeholder="例如: 0912345678">
+                            <div class="invalid-feedback fw-bold fs-6">請填寫查詢用的聯絡電話。</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="form-label lh-base fw-bold">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control form-control-lg bg-light" id="email" name="email" required placeholder="example@mail.com">
+                            <div class="invalid-feedback fw-bold fs-6">請填寫查詢用的 Email信箱。</div>
+                        </div>
+                        <div class="text-center mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill w-100 py-3 shadow-sm hover-elevate">
+                                <i class="fa-solid fa-search me-2"></i>尋找我的報名表
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if registrations != None %}
+            <h3 class="fw-bold mb-4 border-bottom pb-2">您的專屬報名卡片 (共 {{ registrations|length }} 筆)</h3>
+            {% if registrations %}
+                {% for reg in registrations %}
+                <div class="card shadow-sm border-0 rounded-4 mb-4 hover-elevate overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-md-9 p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="fw-bold mb-0 text-primary">{{ reg.course.title }}</h4>
+                                {% if reg.is_waitlisted %}
+                                <span class="badge bg-warning text-dark fs-6 rounded-pill px-3 py-2"><i class="fa-solid fa-hourglass-half me-2"></i>候補第 {{ reg.waitlist_number }} 號</span>
+                                {% elif reg.is_attended %}
+                                <span class="badge bg-secondary fs-6 rounded-pill px-3 py-2"><i class="fa-solid fa-check-double me-2"></i>已結束出席</span>
+                                {% else %}
+                                <span class="badge bg-success fs-6 rounded-pill px-3 py-2"><i class="fa-solid fa-circle-check me-2"></i>正取位</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-2 text-secondary"><i class="fa-regular fa-calendar-check me-2"></i>開課時間：{{ reg.course.start_time|date:"Y年m月d日 H:i" }}</p>
+                            <p class="mb-4 text-secondary"><i class="fa-solid fa-user-tag me-2"></i>您的報名留存紀錄：{{ reg.name }} ({{ reg.phone }}) / 預定攜伴共 <strong>{{ reg.headcount }}</strong> 人</p>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'inn_app:course_detail' reg.course.id %}" class="btn btn-outline-secondary shadow-sm rounded-pill px-4">
+                                    <i class="fa-solid fa-eye me-1"></i> 查看課程
+                                </a>
+                                {% if not reg.is_attended %}
+                                <form action="{% url 'inn_app:cancel_booking' reg.id %}" method="post" onsubmit="return confirm('您確定要取消這筆報名嗎？此動作為永久取消且無法復原！');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="confirm_phone" value="{{ reg.phone }}">
+                                    <input type="hidden" name="confirm_email" value="{{ reg.email }}">
+                                    <button type="submit" class="btn btn-outline-danger shadow-sm rounded-pill px-4">
+                                        <i class="fa-solid fa-xmark text-danger me-1"></i> 取消參加
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3 bg-light d-flex flex-column align-items-center justify-content-center p-4 border-start">
+                            {% if reg.is_waitlisted %}
+                                <div class="text-center text-muted"> <i class="fa-solid fa-clock-rotate-left fa-3x mb-2"></i> <h6 class="fw-bold mt-2">候補中...<br>暫無憑證</h6> </div>
+                            {% elif reg.is_attended %}
+                                <div class="text-center text-success"> 
+                                    <div class="mb-2">
+                                        <i class="fa-solid fa-circle-check fa-4x"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">已核銷入場</h6>
+                                    <small class="text-muted d-block">{{ reg.attended_at|date:"m/d H:i" }}</small>
+                                </div>
+                            {% else %}
+                                <div class="text-center qr-container">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.scheme }}://{{ request.get_host }}{% url 'inn_app:check_in_scan' reg.checkin_token %}" alt="報到 QR Code" class="img-fluid rounded-3 shadow-sm bg-white p-1" style="max-width: 120px;" id="qr-{{ reg.id }}">
+                                    <h6 class="fw-bold text-primary mb-2 mt-2">現場報到用</h6>
+                                    <button onclick="downloadQR('qr-{{ reg.id }}', 'CheckIn_{{ reg.name }}_{{ reg.course.id }}')" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                        <i class="fa-solid fa-download me-1"></i>下載
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-secondary text-center py-5 rounded-4 border-0">
+                    <i class="fa-solid fa-box-open fa-3x mb-3 text-muted"></i>
+                    <h5 class="fw-bold text-muted">目前無法為您找到相符的報名紀錄喔！</h5>
+                </div>
+            {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+const downloadQR = async (imgId, fileName) => {
+    const img = document.getElementById(imgId);
+    try {
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Download failed:', error);
+        // Fallback for some browsers
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.target = '_blank';
+        link.download = `${fileName}.png`;
+        link.click();
+    }
+};
+
+// Bootstrap 5 自訂表單強烈驗證機制
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
+{% endblock %}

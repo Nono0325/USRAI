@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}體驗工作坊 - 風雲客棧數位入口平台{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white">
+    <div class="container mt-4">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold" style="color: var(--primary-color);">精選體驗工作坊</h1>
+            <p class="text-muted">我們提供多樣化的體驗課程，從傳統工藝到現代科技，讓每一位訪客都能親手創造水井的回憶。</p>
+        </div>
+
+        <div class="row g-4">
+            {% for w in workshops %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                    {% if w.image %}
+                    {% if w.image|is_video %}<video src="{{ w.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ w.name }}" style="height: 250px; object-fit: cover;"></video>{% else %}<img src="{{ w.image.url }}" class="card-img-top" alt="{{ w.name }}" style="height: 250px; object-fit: cover;">{% endif %}
+                    {% else %}
+                    <div class="bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 250px;">
+                        {% if '機器人' in w.category %}<i class="fa-solid fa-robot text-primary fa-5x"></i>
+                        {% elif '蒜' in w.category %}<i class="fa-solid fa-mortar-pestle text-primary fa-5x"></i>
+                        {% else %}<i class="fa-solid fa-gift text-primary fa-5x"></i>{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-secondary p-2">{{ w.category }}</span>
+                        </div>
+                        <h4 class="fw-bold mb-3">{{ w.name }}</h4>
+                        <p class="text-muted small mb-4">{{ w.description }}</p>
+                        <div class="mt-auto">
+                            <a href="{% url 'inn_app:course_list' %}" class="btn btn-primary rounded-pill w-100 py-2">
+                                <i class="fa-solid fa-calendar-check me-2"></i>查看開課日程
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p>目前尚無工作坊內容。</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Why choose our workshops section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h3 class="fw-bold">為什麼參加風雲客棧的體驗課程？</h3>
+            </div>
+        </div>
+        <div class="row g-4 d-flex justify-content-center">
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-recycle text-success fa-3x mb-3"></i>
+                    <h5 class="fw-bold">環境永續</h5>
+                    <p class="small text-muted mb-0">利用農業廢棄物轉化為生活藝術，實踐循環經濟。</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-compass-drafting text-primary fa-3x mb-3"></i>
+                    <h5 class="fw-bold">專業指導</h5>
+                    <p class="small text-muted mb-0">與虎科大專家及在地職人交流，學習實務技術與文化背景。</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-people-carry-box text-warning fa-3x mb-3"></i>
+                    <h5 class="fw-bold">在地連結</h5>
+                    <p class="small text-muted mb-0">深入聚落核心，了解水井村的故事，建立與土地的連結。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

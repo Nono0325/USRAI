@@ -1,0 +1,35 @@
+{% extends "admin/base_site.html" %}
+{% load l10n %}
+
+{% block content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2>設定簽到表列印格式</h2>
+        <p style="font-size: 14px; margin-bottom: 20px;">您即將為下列課程匯出實體簽到表名單：</p>
+        <ul style="margin-bottom: 20px;">
+            {% for obj in queryset %}
+            <li><strong>{{ obj }}</strong></li>
+            {% endfor %}
+        </ul>
+        <hr style="margin-bottom: 20px; border: 0; border-top: 1px solid #eee;">
+        <label for="template_id" style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 10px;">請選擇設計範本：</label>
+        <select name="template_id" id="template_id" required style="padding: 10px; font-size: 16px; width: 100%; max-width: 400px; border-radius: 4px; border: 1px solid #ccc;">
+            {% for t in templates %}
+            <option value="{{ t.id }}" {% if t.is_default %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="hidden" name="action" value="export_signin_sheet_to_word" />
+        <input type="hidden" name="apply" value="1" />
+        {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+        {% endfor %}
+        
+        <div style="margin-top: 30px;">
+            <input type="submit" value="確認套用並下載 Word" style="background: #417690; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;" />
+            <a href="#" onclick="window.history.back(); return false;" style="margin-left: 15px; color: #417690;">取消</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

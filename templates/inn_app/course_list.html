@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}客棧課程 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<div class="bg-light py-5">
+    <div class="container text-center mb-5">
+        <h1 class="display-4 fw-bold text-dark">客棧課程報名</h1>
+        <p class="lead text-muted">深入在地，體驗手作、農村文化與生態導覽</p>
+    </div>
+
+    <div class="container">
+        <div class="row g-4">
+            {% for course in courses %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    {% if course.image %}
+                    {% if course.image|is_video %}<video src="{{ course.image.url }}" autoplay loop muted playsinline  class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;"></video>{% else %}<img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;">{% endif %}
+                    {% else %}
+                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fa-solid fa-chalkboard-user fa-3x"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-bold">{{ course.title }}</h4>
+                        <div class="mb-3 text-muted small">
+                            <span class="me-3"><i class="fa-regular fa-calendar me-1"></i>{{ course.start_time|date:"Y/m/d H:i" }}</span>
+                            <span class="me-3"><i class="fa-solid fa-person-chalkboard me-1"></i>{{ course.instructor }}</span>
+                            {% if course.includes_lunch %}
+                            <span class="text-success"><i class="fa-solid fa-utensils me-1"></i>供餐</span>
+                            {% endif %}
+                        </div>
+                        <p class="card-text text-truncate">{{ course.description }}</p>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-success fw-bold"><i class="fa-solid fa-users me-1"></i>名額: {{ course.registration_set.count }} / {{ course.capacity }}</span>
+                            <a href="{% url 'inn_app:course_detail' course.id %}" class="btn btn-primary rounded-pill px-4">查看詳情 / 報名</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-5">
+                <i class="fa-regular fa-folder-open mb-3 fa-3x"></i>
+                <h4>目前客棧尚未開放新課程</h4>
+                <p>敬請期待後續活動與課程上架！</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

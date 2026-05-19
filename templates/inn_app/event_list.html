@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}活動資訊 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container mt-4">
+        <div class="row mb-5">
+            <div class="col-md-8 offset-md-2 text-center">
+                <h1 class="display-5 fw-bold mb-3" style="color: var(--primary-color);">活動資訊</h1>
+                <p class="text-muted">在這裡探索水井村的所有精彩活動。不論是生態導覽、農村體驗還是工作坊，都能在這裡找到最新訊息。</p>
+                <form method="GET" action="{% url 'inn_app:event_list' %}" class="mt-4">
+                    <div class="input-group mb-3 shadow-sm rounded-pill overflow-hidden">
+                        <input type="text" name="q" class="form-control border-0 px-4" placeholder="搜尋活動名稱或內容..." value="{{ query }}">
+                        <button class="btn btn-primary px-4" type="submit">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for event in page_obj %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary rounded-pill px-3">{{ event.date|date:"Y-m-d" }}</span>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3">{{ event.title }}</h4>
+                        <p class="card-text text-muted mb-4">{{ event.description|truncatewords:20 }}</p>
+                        <a href="{% url 'inn_app:event_detail' event.id %}" class="btn btn-outline-primary rounded-pill w-100">詳情 <i class="fa-solid fa-arrow-right-long ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fa-solid fa-calendar-xmark fa-4x text-muted mb-4"></i>
+                <h3 class="fw-bold">目前沒有活動</h3>
+                <p class="text-muted">請稍後再試，或嘗試更新搜尋關鍵字。</p>
+                <a href="{% url 'inn_app:event_list' %}" class="btn btn-secondary rounded-pill mt-3">回到全部活動</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="活動分頁" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link rounded-circle mx-1" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true"><i class="fa-solid fa-angle-left"></i></span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                <li class="page-item active" aria-current="page"><span class="page-link rounded-circle mx-1">{{ i }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link rounded-circle mx-1" href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link rounded-circle mx-1" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true"><i class="fa-solid fa-angle-right"></i></span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

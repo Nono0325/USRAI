@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}聯絡我們 - 水井村風雲客棧{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container mt-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4" style="color: var(--primary-color);">{{ contact_info.title|default:"聯絡我們" }}</h1>
+                <p class="lead mb-4">{{ contact_info.intro_text|default:"有任何問題或是想要預約特別活動嗎？歡迎隨時與我們聯繫！我們會盡快回覆您。" }}</p>
+                <div class="contact-info d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary p-3 me-3 text-white flex-shrink-0">
+                            <i class="fa-solid fa-location-dot fa-xl px-1"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">地址</h5>
+                            <p class="mb-0 text-muted">{{ contact_info.address|default:"桃園市水井村風雲街 8 號" }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary p-3 me-3 text-white flex-shrink-0">
+                            <i class="fa-solid fa-phone fa-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">電話</h5>
+                            <p class="mb-0 text-muted">{{ contact_info.phone|default:"(03) 1234-5678" }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary p-3 me-3 text-white flex-shrink-0">
+                            <i class="fa-solid fa-envelope fa-xl"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">電子郵件</h5>
+                            <p class="mb-0 text-muted">{{ contact_info.email|default:"service@fengyuninn.com" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card p-5 shadow-lg border-0 rounded-4">
+                    <h3 class="fw-bold mb-4">線上預約諮詢</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">您的姓名</label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="請填寫姓名">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">聯絡電話</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required placeholder="請填寫電話號碼">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">電子郵件</label>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="example@email.com">
+                        </div>
+                        <div class="mb-4">
+                            <label for="message" class="form-label">訊息內容</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" required placeholder="請告訴我們您的需求..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">送出訊息 <i class="fa-solid fa-paper-plane ms-2"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Google Map Section -->
+        {% if contact_info.map_iframe %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="map-container" style="min-height: 400px;">
+                        <style>.map-container iframe { width: 100% !important; height: 400px !important; border: 0 !important; }</style>
+                        {{ contact_info.map_iframe|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

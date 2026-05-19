@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}AIoT 科技與互動導覽 - 風雲客棧數位入口平台{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white">
+    <div class="container mt-4">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold" style="color: var(--primary-color);">AIoT 科技與互動導覽</h1>
+            <p class="text-muted">將現代科技導入傳統聚落，開創智慧漁業與趣味觀光的新局面。</p>
+        </div>
+
+        {% for section in sections %}
+            {% if section.layout_type == 'side_image' %}
+            <!-- Layout: Side Image + Cards (AIoT Style) -->
+            <div class="row g-5 mb-5 pt-5">
+                <div class="col-lg-6">
+                    <div class="sticky-top" style="top: 100px;">
+                        {% if section.image %}
+                        {% if section.image|is_video %}<video src="{{ section.image.url }}" autoplay loop muted playsinline  alt="{{ section.title }}" class="img-fluid rounded-4 shadow-lg mb-4"></video>{% else %}<img src="{{ section.image.url }}" alt="{{ section.title }}" class="img-fluid rounded-4 shadow-lg mb-4">{% endif %}
+                        {% else %}
+                        <div class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-4" style="height: 300px;">
+                            <i class="fa-solid fa-microchip text-primary fa-5x"></i>
+                        </div>
+                        {% endif %}
+                        <h3 class="fw-bold mb-3"><i class="fa-solid fa-compass text-primary me-2"></i>{{ section.title }}</h3>
+                        <div class="text-muted fs-5">
+                            {{ section.intro_text|safe }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-4">
+                        {% for tech in section.projects.all %}
+                        {% if tech.is_active %}
+                        <div class="col-12">
+                            <div class="card p-4 border-0 shadow-sm rounded-4 hover-shadow transition">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                        {% if section.id == 1 %}<i class="fa-solid fa-tower-broadcast text-primary"></i>
+                                        {% else %}<i class="fa-solid fa-microchip text-primary"></i>{% endif %}
+                                    </div>
+                                    <h4 class="fw-bold mb-0 text-dark">{{ tech.name }}</h4>
+                                </div>
+                                <div class="text-muted mb-3">
+                                    {{ tech.description|safe }}
+                                </div>
+                                {% if tech.image %}
+                                <div class="ratio ratio-16x9 mb-3 rounded-3 overflow-hidden">
+                                    {% if tech.image|is_video %}<video src="{{ tech.image.url }}" autoplay loop muted playsinline  alt="{{ tech.name }}" style="object-fit: cover;"></video>{% else %}<img src="{{ tech.image.url }}" alt="{{ tech.name }}" style="object-fit: cover;">{% endif %}
+                                </div>
+                                {% endif %}
+                                <span class="badge bg-light text-dark align-self-start">科技項目</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Layout: Side Text + Feature Boxes (AR Style) -->
+            <div class="row align-items-center g-5 mb-5 py-5 {% if not forloop.first %}border-top{% endif %}">
+                <div class="col-lg-5">
+                    <h2 class="display-5 fw-bold" style="color: var(--primary-color);">{{ section.title }}</h2>
+                    <div class="text-muted fs-5 mt-3">
+                        {{ section.intro_text|safe }}
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        {% for tech in section.projects.all %}
+                        {% if tech.is_active %}
+                        <div class="col-6">
+                            <div class="bg-white p-4 rounded-4 text-center shadow-sm h-100 hover-shadow transition">
+                                {% if tech.image %}
+                                <div class="ratio ratio-1x1 mx-auto mb-3" style="width: 80px;">
+                                    {% if tech.image|is_video %}<video src="{{ tech.image.url }}" autoplay loop muted playsinline  alt="{{ tech.name }}" style="object-fit: contain;"></video>{% else %}<img src="{{ tech.image.url }}" alt="{{ tech.name }}" style="object-fit: contain;">{% endif %}
+                                </div>
+                                {% else %}
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-cube fa-3x text-primary"></i>
+                                </div>
+                                {% endif %}
+                                <h6 class="fw-bold">{{ tech.name }}</h6>
+                                <p class="small text-muted mb-0">{{ tech.description|striptags|truncatechars:40 }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        transform: translateY(-5px);
+    }
+    .transition {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
