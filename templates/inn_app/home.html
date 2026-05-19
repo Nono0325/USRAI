@@ -96,7 +96,7 @@
 
 <!-- Offline Dino Mini Game -->
 <section class="container py-4">
-    <div class="dino-game-shell">
+    <div class="dino-game-shell" id="dinoGameShell">
         <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-3">
             <div>
                 <h2 class="h4 fw-bold mb-1"><i class="fa-solid fa-gamepad text-primary me-2"></i>斷網小恐龍</h2>
@@ -105,6 +105,9 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-light text-dark border">分數 <span id="dinoScore">0</span></span>
                 <span class="badge bg-light text-dark border">最佳 <span id="dinoBest">0</span></span>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button" id="dinoToggle">
+                    <i class="fa-solid fa-eye-slash me-1"></i>隱藏
+                </button>
                 <button class="btn btn-sm btn-primary rounded-pill px-3" type="button" id="dinoRestart">
                     <i class="fa-solid fa-rotate-right me-1"></i>重玩
                 </button>
@@ -118,6 +121,9 @@
             </div>
         </div>
     </div>
+    <button class="dino-show-button" type="button" id="dinoShowButton">
+        <i class="fa-solid fa-gamepad me-2"></i>顯示斷網小恐龍
+    </button>
 </section>
 
 <!-- Triple Harmony Services Section -->
@@ -312,6 +318,26 @@
         box-shadow: var(--shadow-soft);
     }
 
+    .dino-game-shell.is-hidden {
+        display: none;
+    }
+
+    .dino-show-button {
+        display: none;
+        width: 100%;
+        padding: 14px 18px;
+        border: 1px dashed rgba(31, 122, 77, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--primary-color);
+        font-weight: 800;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .dino-show-button.is-visible {
+        display: block;
+    }
+
     .dino-canvas-wrap {
         position: relative;
         overflow: hidden;
@@ -359,6 +385,9 @@
     const scoreEl = document.getElementById('dinoScore');
     const bestEl = document.getElementById('dinoBest');
     const restartBtn = document.getElementById('dinoRestart');
+    const toggleBtn = document.getElementById('dinoToggle');
+    const shell = document.getElementById('dinoGameShell');
+    const showBtn = document.getElementById('dinoShowButton');
     const hint = document.getElementById('dinoHint');
     const groundY = 206;
     const gravity = 0.62;
@@ -376,6 +405,22 @@
     const dino = { x: 78, y: groundY - 52, w: 44, h: 52, vy: 0, grounded: true };
 
     bestEl.textContent = best;
+
+    function setDinoVisible(visible) {
+        shell.classList.toggle('is-hidden', !visible);
+        showBtn.classList.toggle('is-visible', !visible);
+        window.localStorage.setItem('fengyun-dino-visible', visible ? '1' : '0');
+        if (!visible) {
+            running = false;
+            hint.classList.remove('is-hidden');
+            hint.innerHTML = '<strong>點擊或按空白鍵開始</strong><span>跳過障礙，撐越久分數越高。</span>';
+        } else {
+            window.setTimeout(() => {
+                resizeCanvas();
+                draw();
+            }, 50);
+        }
+    }
 
     function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
@@ -574,8 +619,11 @@
     });
     canvas.addEventListener('click', startGame);
     restartBtn.addEventListener('click', resetGame);
+    toggleBtn.addEventListener('click', () => setDinoVisible(false));
+    showBtn.addEventListener('click', () => setDinoVisible(true));
     window.addEventListener('keydown', (event) => {
         if (event.code === 'Space' || event.code === 'ArrowUp') {
+            if (shell.classList.contains('is-hidden')) return;
             event.preventDefault();
             if (!running) {
                 startGame();
@@ -587,6 +635,7 @@
 
     resizeCanvas();
     resetGame();
+    setDinoVisible(window.localStorage.getItem('fengyun-dino-visible') !== '0');
 })();
 </script>
 
